@@ -23,7 +23,7 @@ The following user stories detail the major functionality for this phase of the 
 ![phase1](./phase1.png)
 
 ## Phase 2 UML
-![phase1](./phase1.png)
+![phase2](./phase2.png)
 
 ## Sandbox
 CodeSandbox URL: [Click here](https://codesandbox.io/s/keen-parm-3yees)
