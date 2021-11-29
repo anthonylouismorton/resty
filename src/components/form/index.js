@@ -1,14 +1,29 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import './form.scss';
 
 function Form(props){
 
+  const [methodValue, setMethodValue] = useState('')
+  const [urlValue, setURLValue] = useState('')
+
+  const handleURLInput = e => {
+    let {value} = e.target
+    console.log(value)
+    setURLValue(value)
+  }
+
+  const handleMethodInput = e => {
+    let method = e.target.id
+    console.log(method)
+    setMethodValue(method)
+  }
+
   const handleSubmit = e => {
     e.preventDefault();
     const formData = {
-      method:'GET',
-      url: 'https://pokeapi.co/api/v2/pokemon',
+      method: methodValue,
+      url: urlValue,
     };
     props.handleApiCall(formData);
   }
@@ -17,16 +32,16 @@ function Form(props){
     return (
       <>
         <form onSubmit={handleSubmit}>
-          <label >
+          <label>
             <span>URL: </span>
-            <input name='url' type='text' />
+            <input onChange={handleURLInput} name='url' type='text' />
             <button type="submit">GO!</button>
           </label>
           <label className="methods">
-            <span id="get">GET</span>
-            <span id="post">POST</span>
-            <span id="put">PUT</span>
-            <span id="delete">DELETE</span>
+            <span onClick={handleMethodInput} id="get">GET</span>
+            <span onClick={handleMethodInput} id="post">POST</span>
+            <span onClick={handleMethodInput} id="put">PUT</span>
+            <span onClick={handleMethodInput} id="delete">DELETE</span>
           </label>
         </form>
       </>
