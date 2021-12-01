@@ -1,59 +1,128 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useReducer } from 'react';
 import './app.scss';
 import Header from './components/header';
 import Footer from './components/footer';
 import Form from './components/form';
 import Results from './components/results';
+import History from './components/history';
 import axios from 'axios'
 
+
 function App() {
-
-  const [data, setData] = useState(null);
-  const [requestParams, setRequestParams] = useState({});
-  const [method, setMethod] = useState('');
-  const [userData, setUserData] = useState({});
-
-  
-  const callApi = (formParams) => {
-    console.log(formParams);
-    const info = {
-      method: requestParams.method,
-      url: requestParams.url
-
-    };
-    setData(info);
-    setRequestParams({...requestParams, ...formParams});
+  let initialState = {
+    data: null,
+    loading: false,
+    method: null,
+    body: {},
+    url: '',
+    history:[],
+    showHistory: false,
   }
+
+  let reducer = (state, action) => {
+    switch(action.type){
+      case 'DATA':
+        return{
+          ...state,
+          data: action.payload
+        }
+      case 'LOADING':
+        return{
+          ...state,
+          loading: action.payload
+        }
+      case 'PARAMS':
+        return{
+          ...state,
+          body: action.payload.body,
+          url: action.payload.url,
+        }
+      case 'METHOD':
+        return{
+          ...state,
+          method: action.payload,
+        }
+      case 'HISTORY':
+        return{
+          ...state,
+          history: [...state.data, action.payload],
+        }
+        case 'SHOW':
+          return{
+            ...state,
+            showHistory: action.payload
+          }
+      default:
+        return state;
+    }
+  }
+
+  const [state, dispatch] = useReducer(reducer, initialState)
   useEffect(() => {
-  if(method === "GET"){
-    console.log('in here')
-    const action = async () => {
-      try{
-      let response = await axios.get(requestParams.url+`/${userData}`);
-      setData(response.data);
-      }
-      catch(e){
-        if(requestParams){
-          e.message;
+    console.log(state.method)
+    console.log(state.url)
+    let action = {type: 'LOADING', payload: false}
+
+    const callApi = async () => {
+      let action = {type: 'DATA', payload: null}
+      // dispatch(action)
+      try {
+        switch (state.method){
+          case 'GET':
+            // if(state.data === null){
+              let {headers, data} = await axios.get(state.url)
+                action.payload = {data}
+                console.log(data, 'this is the data')
+                dispatch(action)
+            // }
+            // else{
+            //   let {headers, data} = await axios.get(state.url+`/${state.data}`)
+            //     action.payload = {data}
+            //     dispatch(action)
+            // }
+            break;
+          case 'POST':
+            state.data({
+              Message: 'you clicked post'
+            })
+            // await axios.get(requestParams.url+`/${userData}`).then((response) => {
+            //   state.data(response.data);
+            // });
+            break;
+          case 'PUT':
+            state.data({
+              Message: 'you clicked put'
+            })
+            // await axios.get(requestParams.url+`/${userData}`).then((response) => {
+            //   state.data(response.data);
+            // });
+            break;
+          case 'DELETE':
+            state.data({
+              Message: 'you clicked delete'
+            })
+            // await axios.get(requestParams.url+`/${userData}`).then((response) => {
+            //   state.data(response.data);
+            // });
+            break;
+          default:
+            console.log('You can not do that')
         }
       }
-    }
-    action();
-  }
-  }, [requestParams]);
+      catch(e){
+        console.log(e)
+      }
+}
+callApi();
+  }, [state.method]);
   
   return (
     <>
-      <Header />
-      <div>Request Method: {method}</div>
-      <div>URL: {requestParams.url}</div>
-      <Form
-        setRequestParams={setRequestParams}
-        requestParams={requestParams}
-        handleApiCall={callApi}
-        setMethod={setMethod}
-        setUserData={setUserData} />
-      {data ? <Results data={data} /> : <p>loading</p> }
+      <Header dispatch={dispatch}/>
+        <div>Request Method: {state.method}</div>
+        <div>URL: {state.url}</div>
+      <Form dispatch={dispatch}/>
+      { state.showHistory ? <History />:<Results data={state.data} /> }
       <Footer />
     </>
   );
